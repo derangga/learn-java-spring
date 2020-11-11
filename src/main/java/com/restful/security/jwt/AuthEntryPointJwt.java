@@ -1,5 +1,7 @@
 package com.restful.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.restful.data.response.WebResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
@@ -10,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Component
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
@@ -19,6 +22,10 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         logger.error("UnAuthorized error: {}", authException.getMessage());
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error Unauthorized");
+        ObjectMapper mapper = new ObjectMapper();
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        mapper.writeValue(response.getOutputStream(), new WebResponse<>(LocalDateTime.now().toString(), authException.getMessage(), null));
+        response.getOutputStream().flush();
     }
 }

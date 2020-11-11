@@ -5,7 +5,7 @@ import com.restful.data.models.User;
 import com.restful.data.request.LoginRequest;
 import com.restful.data.request.RegisterRequest;
 import com.restful.data.response.LoginResponse;
-import com.restful.data.response.MessageResponse;
+import com.restful.data.response.RegisterResponse;
 import com.restful.enums.ERole;
 import com.restful.exception.UserExistsException;
 import com.restful.repository.RoleRepository;
@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +52,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse userLogin(LoginRequest request) {
+
+        validation.validate(request);
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
@@ -69,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public MessageResponse userRegister(RegisterRequest request) throws UserExistsException {
+    public RegisterResponse userRegister(RegisterRequest request) throws UserExistsException {
 
         validation.validate(request);
 
@@ -118,6 +122,7 @@ public class AuthServiceImpl implements AuthService {
 
         user.setRoles(roles);
         userRepository.save(user);
-        return new MessageResponse("User registered successfully!");
+
+        return new RegisterResponse(user.getUsername(), user.getEmail(), user.getRoles());
     }
 }
